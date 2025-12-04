@@ -1,10 +1,10 @@
 /**
  * Servicio de Calendario - ZonaGamer API
  * Gestión de eventos del calendario (Solo Admin)
- * @version 1. 0.0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const CALENDAR_ENDPOINTS = {
   BASE: '/calendar/eventos',
@@ -90,7 +90,7 @@ const getEventsByDateRange = async (startDate, endDate) => {
  * @returns {Promise<Array>} Lista de próximos eventos
  */
 const getUpcomingEvents = async (days = 7) => {
-  return apiRequest(`${CALENDAR_ENDPOINTS. UPCOMING}?days=${days}`);
+  return apiRequest(`${CALENDAR_ENDPOINTS.UPCOMING}?days=${days}`);
 };
 
 /**
@@ -121,7 +121,7 @@ const updateEvent = async (id, eventData) => {
  * @returns {Promise<Object>} Evento actualizado
  */
 const markAsCompleted = async (id) => {
-  return apiRequest(CALENDAR_ENDPOINTS. COMPLETE(id), {
+  return apiRequest(CALENDAR_ENDPOINTS.COMPLETE(id), {
     method: 'PUT',
   });
 };
@@ -162,7 +162,7 @@ const getCalendarStats = async () => {
  */
 const getTodayEvents = async () => {
   const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0)). toISOString();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
   const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString();
   return getEventsByDateRange(startOfDay, endOfDay);
 };

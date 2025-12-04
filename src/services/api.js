@@ -1,6 +1,6 @@
 /**
  * Configuración base para las peticiones al API de ZonaGamer
- * @version 1.0. 0
+ * @version 1.0.0
  */
 
 const API_BASE_URL = 'http://3.215.177.243:8080/api';
@@ -95,13 +95,13 @@ const apiRequest = async (endpoint, options = {}) => {
   const config = {
     method,
     headers: {
-      ... getHeaders(requiresAuth),
-      ... customHeaders,
+      ...getHeaders(requiresAuth),
+      ...customHeaders,
     },
   };
 
   if (body && method !== 'GET') {
-    config. body = JSON.stringify(body);
+    config.body = JSON.stringify(body);
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);

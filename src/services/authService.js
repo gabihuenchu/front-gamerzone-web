@@ -1,10 +1,10 @@
 /**
  * Servicio de Autenticación - ZonaGamer API
  * Maneja registro, login y verificación de sesión
- * @version 1. 0.0
+ * @version 1.0.0
  */
 
-import { apiRequest, setAuthToken, removeAuthToken, getAuthToken } from './api.config. js';
+import { apiRequest, setAuthToken, removeAuthToken, getAuthToken } from './api.js';
 
 const AUTH_ENDPOINTS = {
   REGISTER: '/auth/register',
@@ -15,11 +15,11 @@ const AUTH_ENDPOINTS = {
 /**
  * Registra un nuevo usuario en el sistema
  * @param {Object} userData - Datos del usuario
- * @param {string} userData. email - Correo electrónico
+ * @param {string} userData.email - Correo electrónico
  * @param {string} userData.password - Contraseña
- * @param {string} userData. nombre - Nombre del usuario
- * @param {string} userData. apellido - Apellido del usuario
- * @param {string} userData. numeroDeTelefono - Número de teléfono
+ * @param {string} userData.nombre - Nombre del usuario
+ * @param {string} userData.apellido - Apellido del usuario
+ * @param {string} userData.numeroDeTelefono - Número de teléfono
  * @returns {Promise<Object>} Datos del usuario registrado con token
  */
 const register = async (userData) => {
@@ -29,8 +29,8 @@ const register = async (userData) => {
     requiresAuth: false,
   });
 
-  if (response. token) {
-    setAuthToken(response. token);
+  if (response.token) {
+    setAuthToken(response.token);
     localStorage.setItem('userData', JSON.stringify(response));
   }
 
@@ -40,7 +40,7 @@ const register = async (userData) => {
 /**
  * Inicia sesión de un usuario
  * @param {Object} credentials - Credenciales de acceso
- * @param {string} credentials. email - Correo electrónico
+ * @param {string} credentials.email - Correo electrónico
  * @param {string} credentials.password - Contraseña
  * @returns {Promise<Object>} Datos del usuario con token
  */
@@ -51,7 +51,7 @@ const login = async (credentials) => {
     requiresAuth: false,
   });
 
-  if (response. token) {
+  if (response.token) {
     setAuthToken(response.token);
     localStorage.setItem('userData', JSON.stringify(response));
   }
@@ -72,7 +72,7 @@ const logout = () => {
  * @returns {boolean} True si hay sesión activa
  */
 const isAuthenticated = () => {
-  return !! getAuthToken();
+  return !!getAuthToken();
 };
 
 /**
@@ -81,7 +81,7 @@ const isAuthenticated = () => {
  */
 const getCurrentUser = () => {
   const userData = localStorage.getItem('userData');
-  return userData ? JSON. parse(userData) : null;
+  return userData ? JSON.parse(userData) : null;
 };
 
 /**
@@ -90,7 +90,7 @@ const getCurrentUser = () => {
  */
 const isAdmin = () => {
   const user = getCurrentUser();
-  return user?. rol === 'ROLE_ADMIN';
+  return user?.rol === 'ROLE_ADMIN';
 };
 
 /**

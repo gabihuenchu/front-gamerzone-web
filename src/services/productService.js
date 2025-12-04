@@ -1,10 +1,10 @@
 /**
  * Servicio de Productos - ZonaGamer API
  * Gestión del catálogo de productos
- * @version 1.0. 0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const PRODUCT_ENDPOINTS = {
   BASE: '/products',
@@ -46,7 +46,7 @@ const getProductsByCategory = async (categoryId) => {
  * @returns {Promise<Array>} Lista de productos destacados
  */
 const getFeaturedProducts = async () => {
-  return apiRequest(PRODUCT_ENDPOINTS. FEATURED);
+  return apiRequest(PRODUCT_ENDPOINTS.FEATURED);
 };
 
 /**
@@ -59,7 +59,7 @@ const searchProducts = async (searchTerm) => {
   if (searchTerm.length < 2) {
     throw new Error('El término de búsqueda debe tener al menos 2 caracteres');
   }
-  return apiRequest(`${PRODUCT_ENDPOINTS.SEARCH}? q=${encodeURIComponent(searchTerm)}`);
+  return apiRequest(`${PRODUCT_ENDPOINTS.SEARCH}?q=${encodeURIComponent(searchTerm)}`);
 };
 
 /**
@@ -100,7 +100,7 @@ const updateProduct = async (id, productData) => {
  * @returns {Promise<null>} Sin contenido
  */
 const deleteProduct = async (id) => {
-  return apiRequest(PRODUCT_ENDPOINTS. BY_ID(id), {
+  return apiRequest(PRODUCT_ENDPOINTS.BY_ID(id), {
     method: 'DELETE',
   });
 };

@@ -5,27 +5,27 @@
  */
 
 // Configuración base
-export * from './api.config.js';
+export * from './api.js';
 
 // Servicios
-export { default as AuthService } from './auth. service.js';
-export { default as HealthService } from './health.service.js';
-export { default as CategoryService } from './category.service.js';
-export { default as ProductService } from './product.service.js';
-export { default as CartService } from './cart.service.js';
-export { default as OrderService } from './order.service.js';
-export { default as UserService } from './user.service. js';
-export { default as CalendarService } from './calendar. service.js';
+export { default as AuthService } from './authService.js';
+export { default as HealthService } from './healthService.js';
+export { default as CategoryService } from './categoryService.js';
+export { default as ProductService } from './productService.js';
+export { default as CartService } from './cartService.js';
+export { default as OrderService } from './orderService.js';
+export { default as UserService } from './userService.js';
+export { default as CalendarService } from './calendarService.js';
 
 // Re-exportación de servicios con nombres
-import AuthService from './auth. service.js';
-import HealthService from './health.service. js';
-import CategoryService from './category. service.js';
-import ProductService from './product.service.js';
-import CartService from './cart.service.js';
-import OrderService from './order.service.js';
-import UserService from './user.service. js';
-import CalendarService from './calendar.service.js';
+import AuthService from './authService.js';
+import HealthService from './healthService.js';
+import CategoryService from './categoryService.js';
+import ProductService from './productService.js';
+import CartService from './cartService.js';
+import OrderService from './orderService.js';
+import UserService from './userService.js';
+import CalendarService from './calendarService.js';
 
 export const services = {
   auth: AuthService,

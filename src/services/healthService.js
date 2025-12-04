@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import { apiRequest } from './api.config. js';
+import { apiRequest } from './api.js';
 
 const HEALTH_ENDPOINTS = {
   GENERAL: '/health',

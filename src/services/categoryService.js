@@ -1,10 +1,10 @@
 /**
  * Servicio de Categorías - ZonaGamer API
  * Gestión de categorías de productos
- * @version 1.0. 0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const CATEGORY_ENDPOINTS = {
   BASE: '/categorias',
@@ -26,7 +26,7 @@ const getAllCategories = async () => {
  * @returns {Promise<Array>} Lista de categorías raíz
  */
 const getRootCategories = async () => {
-  return apiRequest(CATEGORY_ENDPOINTS. ROOT);
+  return apiRequest(CATEGORY_ENDPOINTS.ROOT);
 };
 
 /**
@@ -57,7 +57,7 @@ const getSubcategories = async (parentId) => {
  * @returns {Promise<Object>} Categoría creada
  */
 const createCategory = async (categoryData) => {
-  return apiRequest(CATEGORY_ENDPOINTS. BASE, {
+  return apiRequest(CATEGORY_ENDPOINTS.BASE, {
     method: 'POST',
     body: categoryData,
   });
@@ -82,7 +82,7 @@ const updateCategory = async (id, categoryData) => {
  * @returns {Promise<null>} Sin contenido
  */
 const deleteCategory = async (id) => {
-  return apiRequest(CATEGORY_ENDPOINTS. BY_ID(id), {
+  return apiRequest(CATEGORY_ENDPOINTS.BY_ID(id), {
     method: 'DELETE',
   });
 };
@@ -97,10 +97,10 @@ const getCategoryTree = async () => {
   const buildTree = async (categories) => {
     const tree = [];
     for (const category of categories) {
-      const children = await getSubcategories(category. categoriaId);
+      const children = await getSubcategories(category.categoriaId);
       tree.push({
         ...category,
-        subcategorias: children. length > 0 ?  await buildTree(children) : [],
+        subcategorias: children.length > 0 ? await buildTree(children) : [],
       });
     }
     return tree;

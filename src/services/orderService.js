@@ -1,10 +1,10 @@
 /**
  * Servicio de Órdenes - ZonaGamer API
  * Gestión de órdenes de compra
- * @version 1. 0.0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const ORDER_ENDPOINTS = {
   BASE: '/orders',
@@ -35,7 +35,7 @@ const ORDER_STATUS = {
  * @returns {Promise<Object>} Orden creada
  */
 const checkout = async (checkoutData) => {
-  return apiRequest(ORDER_ENDPOINTS. CHECKOUT, {
+  return apiRequest(ORDER_ENDPOINTS.CHECKOUT, {
     method: 'POST',
     body: checkoutData,
   });
@@ -82,7 +82,7 @@ const getOrdersByStatus = async (status) => {
  * @returns {Promise<Object>} Orden actualizada
  */
 const updateOrderStatus = async (id, newStatus) => {
-  return apiRequest(`${ORDER_ENDPOINTS.UPDATE_STATUS(id)}? newStatus=${newStatus}`, {
+  return apiRequest(`${ORDER_ENDPOINTS.UPDATE_STATUS(id)}?newStatus=${newStatus}`, {
     method: 'PUT',
   });
 };
@@ -93,7 +93,7 @@ const updateOrderStatus = async (id, newStatus) => {
  * @returns {Promise<null>} Sin contenido
  */
 const cancelOrder = async (id) => {
-  return apiRequest(ORDER_ENDPOINTS. BY_ID(id), {
+  return apiRequest(ORDER_ENDPOINTS.BY_ID(id), {
     method: 'DELETE',
   });
 };
@@ -111,7 +111,7 @@ const getPendingOrders = async () => {
  * @returns {Promise<Array>} Lista de órdenes en proceso
  */
 const getProcessingOrders = async () => {
-  return getOrdersByStatus(ORDER_STATUS. PROCESSING);
+  return getOrdersByStatus(ORDER_STATUS.PROCESSING);
 };
 
 /**
@@ -135,7 +135,7 @@ const getDeliveredOrders = async () => {
  * @returns {Promise<Array>} Lista de órdenes canceladas
  */
 const getCancelledOrders = async () => {
-  return getOrdersByStatus(ORDER_STATUS. CANCELLED);
+  return getOrdersByStatus(ORDER_STATUS.CANCELLED);
 };
 
 export const OrderService = {

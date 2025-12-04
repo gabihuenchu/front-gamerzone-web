@@ -1,10 +1,10 @@
 /**
  * Servicio de Usuarios - ZonaGamer API
  * Gestión de usuarios y perfiles
- * @version 1.0. 0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const USER_ENDPOINTS = {
   BASE: '/users',
@@ -60,7 +60,7 @@ const changePassword = async (passwordData) => {
  * @returns {Promise<Array>} Lista de usuarios
  */
 const getAllUsers = async () => {
-  return apiRequest(USER_ENDPOINTS. BASE);
+  return apiRequest(USER_ENDPOINTS.BASE);
 };
 
 /**
@@ -78,7 +78,7 @@ const getUserById = async (id) => {
  * @returns {Promise<null>} Sin contenido
  */
 const promoteToAdmin = async (id) => {
-  return apiRequest(USER_ENDPOINTS. PROMOTE(id), {
+  return apiRequest(USER_ENDPOINTS.PROMOTE(id), {
     method: 'PUT',
   });
 };

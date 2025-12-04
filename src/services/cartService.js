@@ -1,10 +1,10 @@
 /**
  * Servicio de Carrito - ZonaGamer API
  * Gestión del carrito de compras
- * @version 1. 0.0
+ * @version 1.0.0
  */
 
-import { apiRequest } from './api.config.js';
+import { apiRequest } from './api.js';
 
 const CART_ENDPOINTS = {
   BASE: '/cart',
@@ -96,7 +96,7 @@ const decrementItem = async (productId, currentQuantity) => {
 const getCartItemCount = async () => {
   try {
     const cart = await getCart();
-    return cart. totalItems || 0;
+    return cart.totalItems || 0;
   } catch (error) {
     return 0;
   }
