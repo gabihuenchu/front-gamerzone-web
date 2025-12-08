@@ -3,6 +3,7 @@ import Navbar from "../Navbar/Navbar"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { AuthService } from "../../services/authService"
+import { usersCRUD } from "../../lib/api/usersCRUD"
 
 const Login = () => {
     const {
@@ -16,11 +17,53 @@ const Login = () => {
 
     const onSubmit = async (data) => {
         try {
-            const res = await AuthService.login({ email: data.email, password: data.password })
+            // Intentar login con AuthService (API)
+            let res;
+            try {
+                 res = await AuthService.login({ email: data.email, password: data.password })
+            } catch (err) {
+                 // Si falla API, intentamos local
+                 console.log("API login failed, trying local usersCRUD", err)
+            }
+
+            // Si API devuelve token, éxito
             if (res && res.token) {
-                navigate("/dashboard")
+                // Verificar rol en la respuesta API si existe, o asumir dashboard si es admin
+                // Ajuste rápido: si la API no devuelve rol claro, redirigir a dashboard por defecto si es la intención original,
+                // pero el usuario pide restricción. Asumiremos que si hay token API es válido, pero revisaremos rol si viene.
+                const userRole = res.rol || res.role || 'user';
+                
+                // Pequeño delay para asegurar que el alert se renderice/procese antes de navegar
+                setTimeout(() => {
+                    alert("Inicio de sesión exitoso")
+                    if (userRole === 'admin' || userRole === 'ROLE_ADMIN') {
+                        navigate("/dashboard")
+                    } else {
+                        navigate("/")
+                    }
+                }, 100)
                 return
             }
+
+            // Si no, buscar en usersCRUD local
+            const allUsers = await usersCRUD.getAll()
+            const localUser = allUsers.find(u => u.email === data.email && u.password === data.password)
+            
+            if (localUser) {
+                // Simular sesión local
+                localStorage.setItem('userData', JSON.stringify({ ...localUser, token: 'local-token' }))
+                
+                setTimeout(() => {
+                    alert("Inicio de sesión exitoso")
+                    if (localUser.role === 'admin' || localUser.role === 'ROLE_ADMIN') {
+                        navigate("/dashboard")
+                    } else {
+                        navigate("/")
+                    }
+                }, 100)
+                return
+            }
+
             setLoginError("Credenciales inválidas")
         } catch (e) {
             setLoginError(e?.data?.message || "Error al iniciar sesión")

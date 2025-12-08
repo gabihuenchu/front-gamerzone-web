@@ -10,9 +10,9 @@ class UsersCRUDService {
     const local = localStorage.getItem(STORAGE_KEY)
     if (!local) {
       const seed = [
-        { id: 'u1', name: 'Juan Pérez', email: 'juan@example.com', role: 'admin', status: 'active' },
-        { id: 'u2', name: 'María García', email: 'maria@example.com', role: 'user', status: 'active' },
-        { id: 'u3', name: 'Carlos López', email: 'carlos@example.com', role: 'user', status: 'inactive' },
+        { id: 'u1', name: 'Juan Pérez', email: 'juan@example.com', role: 'admin', status: 'active', password: '123' },
+        { id: 'u2', name: 'María García', email: 'maria@example.com', role: 'user', status: 'active', password: '123' },
+        { id: 'u3', name: 'Carlos López', email: 'carlos@example.com', role: 'user', status: 'inactive', password: '123' },
       ]
       this.save(seed)
     }
@@ -43,6 +43,7 @@ class UsersCRUDService {
             email: data.email,
             role: data.role || 'user',
             status: data.status || 'active',
+            password: data.password, // Añadido para autenticación local
           }
           list.push(user)
           this.save(list)

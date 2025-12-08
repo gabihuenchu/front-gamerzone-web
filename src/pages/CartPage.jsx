@@ -49,8 +49,20 @@ export default function CartPage() {
 
   async function loadProfile() {
     try {
-      const me = await UserService.getMyProfile()
-      setProfile(me)
+      // Intentar obtener perfil desde API
+      try {
+          const me = await UserService.getMyProfile()
+          if (me) {
+             setProfile(me)
+             return
+          }
+      } catch (err) {
+          // Si falla API, intentar local
+          const localData = localStorage.getItem('userData')
+          if (localData) {
+              setProfile(JSON.parse(localData))
+          }
+      }
     } catch (error) {
       console.error(error)
     }
@@ -101,9 +113,9 @@ export default function CartPage() {
     <div>
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 pt-6 pb-8 grid gap-8 lg:grid-cols-[1fr_340px]">
-        <section className="bg-white rounded-lg border shadow-sm p-4">
+        <section className="bg-white rounded-lg border shadow-sm p-4 text-black">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold">Carrito de compras</h1>
+            <h1 className="text-xl font-semibold text-black">Carrito de compras</h1>
             {cart.totalItems > 0 ? (
               <button className="btn btn-outline-danger" onClick={clearAll}>Vaciar</button>
             ) : null}
@@ -170,8 +182,8 @@ export default function CartPage() {
             </ul>
           )}
         </section>
-        <aside className="bg-white rounded-lg border shadow-sm p-4 h-fit">
-          <h2 className="text-lg font-semibold mb-3">Resumen</h2>
+        <aside className="bg-white rounded-lg border shadow-sm p-4 h-fit text-black">
+          <h2 className="text-lg font-semibold mb-3 text-black">Resumen</h2>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-neutral-600">Items</span>
             <span className="font-medium">{cart.totalItems}</span>
@@ -181,7 +193,12 @@ export default function CartPage() {
             <span className="font-semibold">${cart.totalPrice?.toFixed ? cart.totalPrice.toFixed(2) : Number(cart.totalPrice).toFixed(2)}</span>
           </div>
           {profile ? (
-            <button className="btn btn-primary w-100">Proceder al pago</button>
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm mb-3">
+                <span className="font-semibold">Usuario:</span> {profile.name || profile.email || 'Cliente'}
+              </div>
+              <button className="btn btn-primary w-100" onClick={() => navigate('/checkout')}>Proceder al pago</button>
+            </div>
           ) : (
             <button className="btn btn-outline-primary w-100" onClick={() => navigate('/login')}>Inicia sesión para comprar</button>
           )}

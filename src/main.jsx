@@ -9,6 +9,8 @@ import ProductPage from './pages/ProductPage.jsx';
 import Dashboard from './pages/DashboardPage.jsx';
 // ArmaTuPC eliminado del sitio
 import CartPage from './pages/CartPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import CheckoutPage from './pages/CheckoutPage.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
@@ -19,6 +21,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path='/login' element={<Login/>}/>
         <Route path='/registro' element={<Register/>}/>
         <Route path='/dashboard' element={<Dashboard/>}/>
+        <Route path='/perfil' element={<ProfilePage/>}/>
+        <Route path='/checkout' element={<CheckoutPage/>}/>
       </Routes>
   </BrowserRouter>
 )

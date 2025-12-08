@@ -28,7 +28,8 @@ export default function ProductCard({ product }) {
                 description: product?.description,
             })
         }
-        navigate('/carrito', { state: { toast: `Agregado: ${product?.name || 'Producto'}` } })
+        alert("Producto añadido correctamente")
+        // navigate('/carrito', { state: { toast: `Agregado: ${product?.name || 'Producto'}` } })
     }
     return (
         <div className="card bg-base-100 w-full shadow-sm">

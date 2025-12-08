@@ -1,18 +1,61 @@
 import logo from '../../assets/logo_02.png'
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from 'react'
 import { CartService } from '../../services/cartService'
 import { LocalCart } from '../../lib/cart/localCart'
 import { getAuthToken } from '../../services/api'
+import { UserService } from '../../services/userService'
+import { AuthService } from '../../services/authService'
 
 function Navbar() {
     const [count, setCount] = useState(0)
+    const [user, setUser] = useState(null)
     const location = useLocation()
+    const navigate = useNavigate()
+
     useEffect(() => {
         const useServer = !!getAuthToken()
         const fn = useServer ? CartService.getCartItemCount : LocalCart.getItemCount
         fn().then((n) => setCount(n)).catch(() => setCount(0))
+        
+        loadUser()
     }, [location.pathname])
+
+    const loadUser = async () => {
+        try {
+            // Intentar obtener usuario desde API
+            const token = getAuthToken();
+            if (token) {
+                 try {
+                     const profile = await UserService.getMyProfile();
+                     if (profile) {
+                         setUser(profile)
+                         return
+                     }
+                 } catch (e) {
+                     // Fallo API, intentar local
+                 }
+            }
+            
+            // Intentar local storage
+            const localData = localStorage.getItem('userData');
+            if (localData) {
+                setUser(JSON.parse(localData));
+            } else {
+                setUser(null)
+            }
+        } catch (error) {
+            console.error(error);
+            setUser(null)
+        }
+    }
+
+    const handleLogout = () => {
+        AuthService.logout()
+        setUser(null)
+        navigate('/login')
+    }
+
     return (
         <nav className="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-body"
             data-bs-theme="dark">
@@ -32,16 +75,63 @@ function Navbar() {
                         {/* NavLink cambia automáticamente la clase a "active" según la ruta */}
                         <NavLink className="nav-link glow-link" to="/" end>Home</NavLink>
                         <NavLink className="nav-link glow-link" to="/productos">Productos</NavLink>
-                        <NavLink className="nav-link glow-link" to="/registro">Regístrate</NavLink>
+                        {!user && <NavLink className="nav-link glow-link" to="/registro">Regístrate</NavLink>}
                     </div>
 
                     <div className="d-flex align-items-center gap-3 ms-lg-auto mt-3 mt-lg-0" style={{ marginRight: '2rem' }}>
-                        <NavLink 
-                            className={({ isActive }) => `nav-link glow-link ${isActive ? 'active' : ''}`}
-                            to="/login"
-                        >
-                            Iniciar Sesión
-                        </NavLink>
+                        {user ? (
+                            <div className="dropdown">
+                                <button className="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span className="fw-semibold">Mi Perfil</span>
+                                </button>
+                                <ul className="dropdown-menu dropdown-menu-end p-3" style={{ minWidth: '250px' }}>
+                                    <li>
+                                        <div className="d-flex flex-col gap-1 mb-2 border-bottom pb-2">
+                                            <span className="fw-bold text-dark">{user.name || 'Usuario'}</span>
+                                            <span className="text-muted small">{user.email}</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <button 
+                                            className="dropdown-item" 
+                                            type="button"
+                                            onClick={() => {
+                                                navigate('/perfil');
+                                                // Intentar cerrar el menú si está abierto (Bootstrap)
+                                                const toggleBtn = document.querySelector('.dropdown-toggle[aria-expanded="true"]');
+                                                if(toggleBtn) toggleBtn.click();
+                                            }}
+                                        >
+                                            Ver Perfil Completo
+                                        </button>
+                                    </li>
+                                    {user.role === 'admin' || user.role === 'ROLE_ADMIN' ? (
+                                        <li>
+                                            <button 
+                                                className="dropdown-item" 
+                                                type="button"
+                                                onClick={() => {
+                                                    navigate('/dashboard');
+                                                    const toggleBtn = document.querySelector('.dropdown-toggle[aria-expanded="true"]');
+                                                    if(toggleBtn) toggleBtn.click();
+                                                }}
+                                            >
+                                                Panel Admin
+                                            </button>
+                                        </li>
+                                    ) : null}
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li><button className="dropdown-item text-danger" onClick={handleLogout}>Cerrar Sesión</button></li>
+                                </ul>
+                            </div>
+                        ) : (
+                            <NavLink 
+                                className={({ isActive }) => `nav-link glow-link ${isActive ? 'active' : ''}`}
+                                to="/login"
+                            >
+                                Iniciar Sesión
+                            </NavLink>
+                        )}
                         
                         <NavLink className="cart-icon-wrapper" style={{ position: 'relative', cursor: 'pointer' }} to="/carrito">
                             <svg 

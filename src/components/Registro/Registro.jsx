@@ -1,5 +1,7 @@
 import { useForm } from "react-hook-form"
 import Navbar from "../Navbar/Navbar"
+import { usersCRUD } from "../../lib/api/usersCRUD"
+import { useNavigate } from "react-router-dom"
 
 const Register = () => {
 
@@ -10,9 +12,24 @@ const Register = () => {
         formState: { errors },
         reset
     } = useForm({ mode: "onChange" })
+    
+    const navigate = useNavigate()
 
-    const onSubmit = (data) => {
-        console.log(data)
+    const onSubmit = async (data) => {
+        try {
+            await usersCRUD.create({
+                name: data.username,
+                email: data.email,
+                role: 'user',
+                status: 'active',
+                password: data.password // Guardamos la contraseña para el login local
+            })
+            alert("Registro exitoso")
+            navigate("/login")
+        } catch (error) {
+            console.error(error)
+            alert("Error al registrar usuario")
+        }
         reset()
     }
 
