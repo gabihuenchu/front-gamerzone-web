@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { fetchCategories } from '../../lib/api/productsApi';
-import { productsCRUD } from '../../lib/api/productsCRUD';
 import { ProductService } from '../../services/productService';
 import { CategoryService } from '../../services/categoryService';
 
@@ -39,16 +37,34 @@ const ProductsManagement = () => {
         try {
             setIsLoading(true);
             setError(null);
-            
-            const [productsData, categoriesData, statsData] = await Promise.all([
-                productsCRUD.getAll(),
-                fetchCategories(),
-                productsCRUD.getStats()
+            const [productsData, categoryTree] = await Promise.all([
+                ProductService.getAllProducts(),
+                CategoryService.getCategoryTree()
             ]);
-
-            setProducts(productsData);
-            setCategories(categoriesData);
-            setStats(statsData);
+            const normalized = Array.isArray(productsData)
+                ? productsData.map((prod) => ({
+                    id: prod.id ?? prod.productoId ?? prod.productId ?? prod._id ?? String(Math.random()),
+                    name: prod.name ?? prod.nombreProducto ?? prod.title ?? 'Producto',
+                    description: prod.description ?? prod.descripcion ?? '',
+                    price: prod.price ?? prod.precio ?? 0,
+                    imageUrl: prod.imageUrl ?? prod.imagenUrl ?? '',
+                    categoryId: prod.categoryId ?? prod.categoriaId ?? (prod.category ? (prod.category.id ?? prod.category.categoriaId) : null),
+                    isFeatured: prod.isFeatured ?? prod.destacado ?? false,
+                    stock: prod.stock ?? 0,
+                }))
+                : [];
+            const mapTree = (nodes) =>
+                (nodes || []).map((n) => ({
+                    id: n.categoriaId ?? n.id,
+                    name: n.nombreCategoria ?? n.name,
+                    children: mapTree(n.subcategorias ?? n.children ?? []),
+                }));
+            setProducts(normalized);
+            setCategories(mapTree(categoryTree));
+            setStats({
+                total: normalized.length,
+                totalStock: normalized.reduce((acc, p) => acc + (Number(p.stock) || 0), 0),
+            });
         } catch (err) {
             setError('Error al cargar los datos');
             console.error(err);
@@ -78,12 +94,21 @@ const ProductsManagement = () => {
     const handleAddProduct = async (e) => {
         e.preventDefault();
         try {
-            await productsCRUD.create(formData);
+            const payload = {
+                nombreProducto: formData.name,
+                descripcion: formData.description,
+                precio: Number(formData.price) || 0,
+                stock: Number(formData.stock) || 0,
+                categoriaId: formData.categoryId,
+                imageUrl: formData.image || '',
+                destacado: false,
+            };
+            await ProductService.createProduct(payload);
             await loadData();
             setShowAddModal(false);
             resetForm();
         } catch (err) {
-            console.error(err)
+            console.error(err);
             alert('Error al agregar producto');
         }
     };
@@ -104,13 +129,23 @@ const ProductsManagement = () => {
     const handleUpdateProduct = async (e) => {
         e.preventDefault();
         try {
-            await productsCRUD.update(selectedProduct.id, formData);
+            const id = selectedProduct?.id ?? selectedProduct?.productoId ?? selectedProduct?.productId ?? selectedProduct?._id;
+            const payload = {
+                nombreProducto: formData.name,
+                descripcion: formData.description,
+                precio: Number(formData.price) || 0,
+                stock: Number(formData.stock) || 0,
+                categoriaId: formData.categoryId,
+                imageUrl: formData.image || selectedProduct?.imageUrl || '',
+                destacado: Boolean(selectedProduct?.isFeatured),
+            };
+            await ProductService.updateProduct(id, payload);
             await loadData();
             setShowEditModal(false);
             setSelectedProduct(null);
             resetForm();
         } catch (err) {
-            console.error(err)
+            console.error(err);
             alert('Error al actualizar producto');
         }
     };
@@ -122,12 +157,13 @@ const ProductsManagement = () => {
 
     const handleDeleteProduct = async () => {
         try {
-            await productsCRUD.delete(selectedProduct.id);
+            const id = selectedProduct?.id ?? selectedProduct?.productoId ?? selectedProduct?.productId ?? selectedProduct?._id;
+            await ProductService.deleteProduct(id);
             await loadData();
             setShowDeleteModal(false);
             setSelectedProduct(null);
         } catch (err) {
-            console.error(err)
+            console.error(err);
             alert('Error al eliminar producto');
         }
     };
@@ -150,16 +186,7 @@ const ProductsManagement = () => {
     );
 
     const handleResetProducts = async () => {
-        if (window.confirm('¿Estás seguro de que deseas resetear todos los productos a los valores por defecto?')) {
-            try {
-                await productsCRUD.reset();
-                await loadData();
-                alert('Productos reseteados exitosamente');
-            } catch (err) {
-                console.error(err)
-                alert('Error al resetear productos');
-            }
-        }
+        alert('Función no disponible con datos de la base de datos');
     };
 
     return (
