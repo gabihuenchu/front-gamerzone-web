@@ -39,8 +39,11 @@ const UsersManagement = () => {
                                     ? `${u.nombre} ${u.apellido}`
                                     : 'Usuario',
                         email: u.email ?? u.correo ?? 'sin@email',
-                        role: u.role ?? (u.admin ? 'admin' : 'user'),
-                        status: u.status ?? (u.activo ? 'active' : 'inactive'),
+                        role: u.role ?? (u.admin || u.isAdmin ? 'admin' : 'user'),
+                        // ✅ FIX: Leer 'active' del DTO correctamente
+                        status: (u.active === true || u.status === 'active') ? 'active' : 'inactive',
+                        // ✅ También preservar el campo 'active' original
+                        active: u.active ?? false
                     }));
                     setUsers(normalized);
                     setStats({

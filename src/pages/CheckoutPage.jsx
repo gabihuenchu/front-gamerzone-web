@@ -5,6 +5,7 @@ import { UserService } from '../services/userService'
 import { CartService } from '../services/cartService'
 import { LocalCart } from '../lib/cart/localCart'
 import { getAuthToken, isServerAuthToken } from '../services/api'
+import { OrderService } from '../services/orderService'
 
 export default function CheckoutPage() {
     const [user, setUser] = useState(null)
@@ -77,37 +78,49 @@ export default function CheckoutPage() {
     }
 
     const handleConfirmOrder = async () => {
-        if (!formData.address.trim()) {
-            alert("Por favor ingresa una dirección de envío")
+        const address = formData.address.trim()
+        if (!address || address.length < 10) {
+            alert("La dirección debe tener al menos 10 caracteres")
             return
         }
 
-        // Aquí iría la lógica real de crear la orden
-        // Por ahora simulamos éxito
-        
-        // Opcional: Actualizar dirección del usuario si cambió
-        if (user.id && formData.address !== user.address) {
-             try {
-                const token = getAuthToken()
-                const useServer = isServerAuthToken(token)
-                if (useServer) {
-                    await UserService.updateMyProfile({ address: formData.address })
+        const token = getAuthToken()
+        const useServer = isServerAuthToken(token)
+
+        if (useServer) {
+            try {
+                const order = await OrderService.checkout({
+                    deliveryAddress: address,
+                    metodoDePago: 'CREDIT_CARD',
+                    notes: formData.notes || ''
+                })
+
+                if (user.id && address !== user.address) {
+                    try {
+                        await UserService.updateMyProfile({ address })
+                        const updatedUser = { ...user, address }
+                        localStorage.setItem('userData', JSON.stringify(updatedUser))
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
-                const updatedUser = { ...user, address: formData.address }
-                localStorage.setItem('userData', JSON.stringify(updatedUser))
-             } catch (e) {
-                 console.error("No se pudo actualizar la dirección del perfil", e)
-             }
+
+                const totalText = typeof order?.total === 'number' ? order.total.toFixed(2) : Number(order?.total || 0).toFixed(2)
+                const numero = order?.numeroDeOrden ? `Número de Orden: ${order.numeroDeOrden}\n` : ''
+                alert(`¡Pedido realizado con éxito!\n${numero}Total: $${totalText}`)
+
+                await CartService.clearCart()
+                navigate('/')
+                return
+            } catch (e) {
+                const msg = e?.data?.message || e?.message || 'No se pudo procesar el pedido'
+                alert(msg)
+                return
+            }
         }
 
         alert("¡Pedido realizado con éxito!\n\nGracias por tu compra.")
-        
-        // Vaciar carrito
-        const token = getAuthToken()
-        const useServer = isServerAuthToken(token)
-        if (useServer) await CartService.clearCart()
-        else await LocalCart.clearCart()
-
+        await LocalCart.clearCart()
         navigate('/')
     }
 

@@ -12,9 +12,11 @@ import CartPage from './pages/CartPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { CartProvider } from './services/CartContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
+    <CartProvider>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/productos" element={<ProductPage />} />
@@ -25,5 +27,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path='/perfil' element={<ProfilePage/>}/>
         <Route path='/checkout' element={<CheckoutPage/>}/>
       </Routes>
+    </CartProvider>
   </BrowserRouter>
 )

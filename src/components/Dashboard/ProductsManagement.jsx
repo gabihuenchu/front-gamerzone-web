@@ -95,21 +95,21 @@ const ProductsManagement = () => {
         e.preventDefault();
         try {
             const payload = {
-                nombreProducto: formData.name,
-                descripcion: formData.description,
-                precio: Number(formData.price) || 0,
-                stock: Number(formData.stock) || 0,
-                categoriaId: formData.categoryId,
-                imageUrl: formData.image || '',
-                destacado: false,
+                nombreProducto: formData.name,           // ✅ Backend espera "nombreProducto"
+                descripcion: formData.description,       // ✅ Backend espera "descripcion"
+                price: Number(formData.price) || 0,      // ✅ Backend espera "price"
+                stock: Number(formData.stock) || 0,      // ✅ Backend espera "stock"
+                categoryId: formData.categoryId,         // ✅ Backend espera "categoryId"
+                imageUrl: formData.image || '',          // ✅ Backend espera "imageUrl"
+                isFeatured: false,                       // ✅ Backend espera "isFeatured"
             };
             await ProductService.createProduct(payload);
             await loadData();
             setShowAddModal(false);
             resetForm();
         } catch (err) {
-            console.error(err);
-            alert('Error al agregar producto');
+            console.error('Error al agregar producto:', err);
+            alert('Error al agregar producto: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -131,13 +131,13 @@ const ProductsManagement = () => {
         try {
             const id = selectedProduct?.id ?? selectedProduct?.productoId ?? selectedProduct?.productId ?? selectedProduct?._id;
             const payload = {
-                nombreProducto: formData.name,
-                descripcion: formData.description,
-                precio: Number(formData.price) || 0,
-                stock: Number(formData.stock) || 0,
-                categoriaId: formData.categoryId,
-                imageUrl: formData.image || selectedProduct?.imageUrl || '',
-                destacado: Boolean(selectedProduct?.isFeatured),
+                nombreProducto: formData.name,                              // ✅ Backend espera "nombreProducto"
+                descripcion: formData.description,                          // ✅ Backend espera "descripcion"
+                price: Number(formData.price) || 0,                         // ✅ Backend espera "price"
+                stock: Number(formData.stock) || 0,                         // ✅ Backend espera "stock"
+                categoryId: formData.categoryId,                            // ✅ Backend espera "categoryId"
+                imageUrl: formData.image || selectedProduct?.imageUrl || '', // ✅ Backend espera "imageUrl"
+                isFeatured: Boolean(selectedProduct?.isFeatured),           // ✅ Backend espera "isFeatured"
             };
             await ProductService.updateProduct(id, payload);
             await loadData();
@@ -145,8 +145,8 @@ const ProductsManagement = () => {
             setSelectedProduct(null);
             resetForm();
         } catch (err) {
-            console.error(err);
-            alert('Error al actualizar producto');
+            console.error('Error al actualizar producto:', err);
+            alert('Error al actualizar producto: ' + (err.response?.data?.message || err.message));
         }
     };
 
@@ -407,19 +407,27 @@ const ProductsManagement = () => {
                                     className="w-full !px-4 !py-2 !text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
                                     <option value="">Selecciona una categoría</option>
-                                    {categories.map(cat => (
-                                        <optgroup key={cat.id} label={cat.name}>
-                                            {cat.children ? (
-                                                cat.children.map(child => (
-                                                    <option key={child.id} value={child.id}>
-                                                        {child.name}
-                                                    </option>
-                                                ))
-                                            ) : (
-                                                <option value={cat.id}>{cat.name}</option>
-                                            )}
-                                        </optgroup>
-                                    ))}
+                                    {categories.map(cat => {
+                                        // Si tiene hijos, crear un optgroup
+                                        if (cat.children && cat.children.length > 0) {
+                                            return (
+                                                <optgroup key={cat.id} label={cat.name}>
+                                                    {cat.children.map(child => (
+                                                        <option key={child.id} value={child.id}>
+                                                            {child.name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            );
+                                        } else {
+                                            // Si no tiene hijos, renderizar como opción normal
+                                            return (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            );
+                                        }
+                                    })}
                                 </select>
                             </div>
 
@@ -544,19 +552,25 @@ const ProductsManagement = () => {
                                     className="w-full !px-4 !py-2 !text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
                                     <option value="">Selecciona una categoría</option>
-                                    {categories.map(cat => (
-                                        <optgroup key={cat.id} label={cat.name}>
-                                            {cat.children ? (
-                                                cat.children.map(child => (
-                                                    <option key={child.id} value={child.id}>
-                                                        {child.name}
-                                                    </option>
-                                                ))
-                                            ) : (
-                                                <option value={cat.id}>{cat.name}</option>
-                                            )}
-                                        </optgroup>
-                                    ))}
+                                    {categories.map(cat => {
+                                        if (cat.children && cat.children.length > 0) {
+                                            return (
+                                                <optgroup key={cat.id} label={cat.name}>
+                                                    {cat.children.map(child => (
+                                                        <option key={child.id} value={child.id}>
+                                                            {child.name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            );
+                                        } else {
+                                            return (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            );
+                                        }
+                                    })}
                                 </select>
                             </div>
 

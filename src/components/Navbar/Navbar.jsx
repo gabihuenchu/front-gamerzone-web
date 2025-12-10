@@ -102,8 +102,7 @@ function Navbar() {
                                 Iniciar Sesión
                             </NavLink>
                         )}
-                    </div>
-                    <div className="d-flex align-items-center ms-lg-auto" style={{ marginRight: '2rem' }}>
+                        <div className="d-flex align-items-center ms-lg-auto" style={{ marginRight: '6rem' }}>
                         <NavLink className="cart-icon-wrapper" style={{ position: 'relative', cursor: 'pointer', zIndex: 1 }} to="/carrito">
                             <svg 
                                 className="cart-icon" 
@@ -146,6 +145,7 @@ function Navbar() {
                                 {count}
                             </span>
                         </NavLink>
+                    </div>
                     </div>
                 </div>
             </div>

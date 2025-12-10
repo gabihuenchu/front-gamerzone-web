@@ -30,7 +30,7 @@ const getMyProfile = async () => {
  * Actualiza el perfil del usuario actual
  * @param {Object} profileData - Datos a actualizar
  * @param {string} profileData.nombre - Nombre
- * @param {string} profileData. apellido - Apellido
+ * @param {string} profileData.apellido - Apellido
  * @param {string} profileData.numeroDeTelefono - Teléfono
  * @returns {Promise<Object>} Perfil actualizado
  */

@@ -1,16 +1,58 @@
 import { useState } from "react";
 
+function CategoryItem({ category, selected, onToggleCategory, isChild = false }) {
+    const active = selected.includes(category.id);
+    
+    return (
+        <label
+            className={`flex items-center gap-2.5 cursor-pointer text-sm rounded-md px-3 py-2 transition-colors hover:bg-gray-700/40 ${
+                isChild ? 'ml-4' : ''
+            }`}
+        >
+            <input
+                type="checkbox"
+                checked={active}
+                onChange={() => onToggleCategory(category.id)}
+                className="
+                    appearance-none w-5 h-5
+                    rounded-lg
+                    border-2 border-gray-500
+                    bg-gray-700
+                    grid place-content-center
+                    transition-colors duration-200
+                    checked:bg-blue-600 checked:border-blue-600
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+                    after:content-['✓'] after:text-[10px] after:font-bold after:text-white
+                    after:opacity-0 checked:after:opacity-100
+                "
+            />
+            <span className="flex-1 text-gray-900 font-medium">
+                {isChild && '↳ '}
+                {category.name}
+            </span>
+        </label>
+    );
+}
+
 function ParentItem({ cat, selected, onToggleCategory }) {
     const [open, setOpen] = useState(true);
-    const hasSelected = cat.children?.some(child => selected.includes(child.id));
+    const hasChildren = cat.children && cat.children.length > 0;
+    const hasSelected = hasChildren && cat.children.some(child => selected.includes(child.id));
 
+    // Si NO tiene hijos, renderizar como categoría simple
+    if (!hasChildren) {
+        return <CategoryItem category={cat} selected={selected} onToggleCategory={onToggleCategory} />;
+    }
+
+    // Si tiene hijos, renderizar como acordeón
     return (
         <div className="border-b border-neutral-100 last:border-b-0">
             <button
                 type="button"
                 onClick={() => setOpen((o) => !o)}
-                className={`w-full flex items-center justify-between py-3 px-2 text-sm font-semibold rounded-md transition-colors hover:bg-neutral-50 ${hasSelected ? 'text-emerald-700' : 'text-neutral-800'
-                    }`}
+                className={`w-full flex items-center justify-between py-3 px-2 text-sm font-semibold rounded-md transition-colors hover:bg-neutral-50 ${
+                    hasSelected ? 'text-emerald-700' : 'text-neutral-800'
+                }`}
                 aria-expanded={open}
                 aria-controls={`panel-${cat.id}`}
             >
@@ -33,36 +75,17 @@ function ParentItem({ cat, selected, onToggleCategory }) {
             <div
                 id={`panel-${cat.id}`}
                 hidden={!open}
-                className="pl-3 pr-2 pb-3 space-y-1.5 animate-in fade-in-0 slide-in-from-top-2"
+                className="pl-3 pr-2 pb-3 space-y-1.5 animate-in fade-in-from-top-2"
             >
-                {cat.children?.map((child) => {
-                    const active = selected.includes(child.id);
-                    return (
-                        <label
-                            key={child.id}
-                            className="flex items-center gap-2.5 cursor-pointer text-sm rounded-md px-3 py-2 transition-colors hover:bg-gray-700/40"
-                        >
-                            <input
-                                type="checkbox"
-                                checked={active}
-                                onChange={() => onToggleCategory(child.id)}
-                                className="
-                                        appearance-none w-5 h-5
-                                        rounded-lg
-                                        border-2 border-gray-500
-                                        bg-gray-700
-                                        grid place-content-center
-                                        transition-colors duration-200
-                                        checked:bg-blue-600 checked:border-blue-600
-                                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
-                                        after:content-['✓'] after:text-[10px] after:font-bold after:text-white
-                                        after:opacity-0 checked:after:opacity-100
-                                        "
-                            />
-                            <span className="flex-1 text-gray-900">{child.name}</span>
-                        </label>
-                    );
-                })}
+                {cat.children.map((child) => (
+                    <CategoryItem
+                        key={child.id}
+                        category={child}
+                        selected={selected}
+                        onToggleCategory={onToggleCategory}
+                        isChild={true}
+                    />
+                ))}
             </div>
         </div>
     );

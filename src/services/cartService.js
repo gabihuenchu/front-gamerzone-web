@@ -1,10 +1,11 @@
 /**
  * Servicio de Carrito - ZonaGamer API
  * Gestión del carrito de compras
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { apiRequest } from './api.js';
+import { ProductService } from './productService.js';
 
 const CART_ENDPOINTS = {
   BASE: '/cart',
@@ -17,7 +18,9 @@ const CART_ENDPOINTS = {
  * @returns {Promise<Object>} Datos del carrito
  */
 const getCart = async () => {
-  return apiRequest(CART_ENDPOINTS.BASE);
+  const response = await apiRequest(CART_ENDPOINTS.BASE);
+  const cart = normalizeCart(response);
+  return await enrichCart(cart);
 };
 
 /**
@@ -27,10 +30,12 @@ const getCart = async () => {
  * @returns {Promise<Object>} Carrito actualizado
  */
 const addToCart = async (productId, quantity = 1) => {
-  return apiRequest(CART_ENDPOINTS.ADD, {
+  const response = await apiRequest(CART_ENDPOINTS.ADD, {
     method: 'POST',
     body: { productId, quantity },
   });
+  const cart = normalizeCart(response);
+  return await enrichCart(cart);
 };
 
 /**
@@ -40,9 +45,15 @@ const addToCart = async (productId, quantity = 1) => {
  * @returns {Promise<Object>} Carrito actualizado
  */
 const updateCartItem = async (productId, quantity) => {
-  return apiRequest(`${CART_ENDPOINTS.ITEM(productId)}?quantity=${quantity}`, {
+  const qty = parseInt(quantity, 10);
+  if (Number.isNaN(qty) || qty < 1) {
+    throw new Error('Cantidad inválida');
+  }
+  const response = await apiRequest(`${CART_ENDPOINTS.ITEM(productId)}?quantity=${qty}`, {
     method: 'PUT',
   });
+  const cart = normalizeCart(response);
+  return await enrichCart(cart);
 };
 
 /**
@@ -51,19 +62,22 @@ const updateCartItem = async (productId, quantity) => {
  * @returns {Promise<Object>} Carrito actualizado
  */
 const removeFromCart = async (productId) => {
-  return apiRequest(CART_ENDPOINTS.ITEM(productId), {
+  const response = await apiRequest(CART_ENDPOINTS.ITEM(productId), {
     method: 'DELETE',
   });
+  const cart = normalizeCart(response);
+  return await enrichCart(cart);
 };
 
 /**
  * Vacía completamente el carrito
- * @returns {Promise<null>} Sin contenido
+ * @returns {Promise<Object>} Carrito vacío
  */
 const clearCart = async () => {
-  return apiRequest(CART_ENDPOINTS.BASE, {
+  await apiRequest(CART_ENDPOINTS.BASE, {
     method: 'DELETE',
   });
+  return { items: [], totalItems: 0, totalPrice: 0 };
 };
 
 /**
@@ -99,6 +113,73 @@ const getCartItemCount = async () => {
     return cart.totalItems || 0;
   } catch {
     return 0;
+  }
+};
+
+/**
+ * Normaliza la respuesta del backend para el frontend
+ * @param {Object} cartData - Datos del carrito del backend
+ * @returns {Object} Carrito normalizado
+ */
+const normalizeCart = (cartData) => {
+  if (!cartData) {
+    return { items: [], totalItems: 0, totalPrice: 0 };
+  }
+
+  // ✅ Normalizar items del carrito
+  const items = (cartData.items || []).map(item => ({
+    // IDs
+    productId: item.productId || item.id,
+    cartItemId: item.cartItemId || item.id,
+    
+    // Información del producto (mapeo español → inglés)
+    name: item.nombreProducto || item.name,
+    price: item.precio || item.price,
+    imageUrl: item.imageUrl || item.imagenUrl,
+    description: item.descripcion || item.description,
+    
+    // Cantidad y subtotal
+    quantity: item.quantity || item.cantidad || 1,
+    subtotal: item.subtotal,
+  }));
+
+  return {
+    cartId: cartData.cartId || cartData.id,
+    userId: cartData.userId || cartData.usuarioId,
+    items,
+    totalItems: cartData.totalItems,
+    totalPrice: cartData.totalPrice,
+  };
+};
+
+const enrichCart = async (cart) => {
+  try {
+    const items = await Promise.all((cart.items || []).map(async (item) => {
+      const needs = !item.name || item.price == null || item.subtotal == null || !item.imageUrl;
+      if (!needs) return item;
+      try {
+        const p = await ProductService.getProductById(item.productId);
+        const price = p.precio != null ? p.precio : p.price != null ? p.price : item.price || 0;
+        const quantity = item.quantity || 1;
+        return {
+          ...item,
+          name: item.name || p.nombreProducto || p.name || 'Producto',
+          price,
+          imageUrl: item.imageUrl || p.imageUrl || p.imagenUrl || '',
+          description: item.description || p.descripcion || p.description,
+          subtotal: item.subtotal != null ? item.subtotal : price * quantity,
+        };
+      } catch {
+        const price = item.price || 0;
+        const quantity = item.quantity || 1;
+        return { ...item, name: item.name || 'Producto', subtotal: item.subtotal != null ? item.subtotal : price * quantity };
+      }
+    }));
+    const totalItems = items.reduce((s, it) => s + (it.quantity || 0), 0);
+    const totalPrice = items.reduce((s, it) => s + (Number(it.subtotal || 0)), 0);
+    return { ...cart, items, totalItems: totalItems || cart.totalItems || 0, totalPrice: totalPrice || cart.totalPrice || 0 };
+  } catch {
+    return cart;
   }
 };
 

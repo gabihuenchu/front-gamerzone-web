@@ -37,7 +37,7 @@ export default function ProfilePage() {
                     setLoading(false)
                     return
                 }
-            } catch (e) {
+            } catch {
                 // Fallo API
             }
 
